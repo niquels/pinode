@@ -2,7 +2,8 @@
 var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
-    , port = (process.env.PORT || 8081);
+    , port = (process.env.PORT || 8081), gpio = require('pi-gpio'), WebSocketServer = require('ws').Server
+
 
 //Setup Express
 var server = express.createServer();
@@ -45,13 +46,25 @@ io.sockets.on('connection', function(socket){
     socket.broadcast.emit('server_message',data);
     socket.emit('server_message',data);
   });
+
+  socket.on('setPseudo', function (data) {
+   socket.set('pseudo', data);
+ });
   socket.on('disconnect', function(){
     console.log('Client Disconnected.');
   });
 });
 
 
-///////////////////////////////////////////
+//set up ws
+wss = new WebSocketServer({port: 8765});
+wss.on('connection', function(ws) {
+ 	ws.on('message', function (message) {
+		console.log('gpio pin is high')
+		})
+})
+
+//////////////////////////////////////////
 //              Routes                   //
 ///////////////////////////////////////////
 

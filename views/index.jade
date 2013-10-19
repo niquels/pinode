@@ -1,11 +1,10 @@
+doctype 5
 h1 Welcome to Jde
 
-button.btn(onclick="gpioJS();") LIGHTS
+script(src='/js/pinOut.js')
+button.btn(onclick="pinOn()") LIGHTS
+
 P
 	| This is straight html
-	| <script type="text/javascript">
-	|  function gpioJS(){
-	|     alert("You clicked");
-	| }
-	| </script>
+	| Or JS??
 P.
