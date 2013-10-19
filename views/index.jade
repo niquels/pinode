@@ -1,6 +1,11 @@
-extends layout
+h1 Welcome to Jde
 
-block content
-	div
-		a(id='sender')='Send a Message'
-		ul(id='receiver')
+button.btn(onclick="gpioJS();") LIGHTS
+P
+	| This is straight html
+	| <script type="text/javascript">
+	|  function gpioJS(){
+	|     alert("You clicked");
+	| }
+	| </script>
+P.
