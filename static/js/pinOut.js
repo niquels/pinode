@@ -6,6 +6,6 @@ socket.onclose = function(event){
 //	console.log('The socket has been closed', event);
 }
 
-function pinOn() {
-	socket.send('pin1:on');
+function pinToggle(pin) {
+	socket.send(pin);
 }

@@ -60,7 +60,7 @@ io.sockets.on('connection', function(socket){
 wss = new WebSocketServer({port: 8765});
 wss.on('connection', function(ws) {
  	ws.on('message', function (message) {
-		console.log('gpio pin is high')
+		console.log('toggling pin ' + message); // add case if message
 		})
 })
 
