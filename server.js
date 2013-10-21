@@ -62,14 +62,18 @@ function Client(name) {
 function Light(pin) {
 	this.pin = pin
 	this.lit = false
+	this.enable = function() {
+		gpio.open(this.pin, 'output', function(err) { console.log('error opening pin') } )
+	}
+	this.disable = function() {
+		gpio.close(this.pin, function() { console.log('closing pin') })
+	}
 	this.toggle = function() {
 		if(this.lit){
 			gpio.write(this.pin, 0, function(){})
-			gpio.close(this.pin, function(){})
 			this.lit=false
 		}
 		else {
-			gpio.open(this.pin, 'output', function(){})
 			gpio.write(this.pin, function(){})
 			this.lit=true
 		}	
@@ -77,6 +81,7 @@ function Light(pin) {
 }
 var green = new Light(16)
 var red = new Light(18)
+var numClients = 0
 
 //set up ws
 wss = new WebSocketServer({port: 8765});
@@ -92,11 +97,19 @@ wss.on('connection', function(ws) {
 	})
 	ws.on('close', function () {
 		console.log('client closed')
+		numClients-=1
+		green.disable()
+		red.disable()
 	})
 	ws.on('open',  function() {
 		console.log('new client')
 		//clients[numClients] = new Client(Math.floor((Math.random()*100)+1))
 		//numClients+=1
+		if(numClients==0){
+			green.enable()
+			red.enable()
+		}
+		numClients+=1
 	})
 })
 /*
