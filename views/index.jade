@@ -1,11 +1,13 @@
 doctype 5
-h1 Welcome to Jde
+h1 Welcome
 
 script(src='/js/pinOut.js')
-button.btn(onclick="pinToggle(1)") LIGHT1
-button.btn(onclick="pinToggle(2)") LIGHT2
-button.btn(onclick="pinToggle(3)") LIGHT3
+//- button.btn(onclick="pinToggle(1)") LIGHT1
+//- button.btn(onclick="pinToggle(2)") LIGHT2
+//- button.btn(onclick="pinToggle(3)") LIGHT3
+input(type="image", src="/images/greenLed.jpg", onclick="pinToggle(1)")
+input(type="image", src="/images/redLed.jpg", onclick="pinToggle(2)")
+input(type="image", src="/images/light.jpg", onclick="pinToggle(3)")
 P
-	| This is straight html
-	| Or JS??
+	| Click one of the images to toggle it 
 P.

@@ -2,7 +2,7 @@
 var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
-    , port = (process.env.PORT || 8081), gpio = require('pi-gpio'), WebSocketServer = require('ws').Server
+    , port = (process.env.PORT || 8081), gpio = require('pi-gpio'), WebSocketServer = require('ws').Server, Imap = require('imap'), inspect = require('util').inspects
 
 
 //Setup Express
@@ -55,14 +55,114 @@ io.sockets.on('connection', function(socket){
   });
 });
 
+function Client(name) {
+	this.name= name
+}
+
+function Light(pin) {
+	this.pin = pin
+	this.lit = false
+	this.toggle = function() {
+		if(this.lit){
+			gpio.write(this.pin, 0, function(){})
+			gpio.close(this.pin, function(){})
+			this.lit=false
+		}
+		else {
+			gpio.open(this.pin, 'output', function(){})
+			gpio.write(this.pin, function(){})
+			this.lit=true
+		}	
+	}
+}
+var green = new Light(16)
+var red = new Light(18)
 
 //set up ws
 wss = new WebSocketServer({port: 8765});
+var Client1 = new Client('matt') 
 wss.on('connection', function(ws) {
  	ws.on('message', function (message) {
-		console.log('toggling pin ' + message); // add case if message
-		})
+		if(message=='1'){
+			green.toggle()
+		}
+		if(message=='2') {
+			red.toggle()	
+		}
+	})
+	ws.on('close', function () {
+		console.log('client closed')
+	})
+	ws.on('open',  function() {
+		console.log('new client')
+		//clients[numClients] = new Client(Math.floor((Math.random()*100)+1))
+		//numClients+=1
+	})
 })
+/*
+  var imap = new Imap({
+  user: 'mbelkin2@gmail.com',
+  password: 'c4rls4g4n',
+  host: 'imap.gmail.com',
+  port: 993,
+  tls: true,
+  tlsOptions: { rejectUnauthorized: false }
+});
+
+function openInbox(cb) {
+  imap.openBox('INBOX', true, cb);
+}
+
+imap.once('ready', function() {
+  openInbox(function(err, box) {
+    if (err) throw err;
+    var f = imap.seq.fetch('1:3', {
+      bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
+      struct: true
+    });
+    f.on('message', function(msg, seqno) {
+      console.log('Message #%d', seqno);
+      var prefix = '(#' + seqno + ') ';
+      msg.on('body', function(stream, info) {
+        var buffer = '';
+        stream.on('data', function(chunk) {
+          buffer += chunk.toString('utf8');
+        });
+        stream.once('end', function() {
+//          console.log(prefix + 'Parsed header: %s', inspect(Imap.parseHeader(buffer)));
+        });
+      });
+      msg.once('attributes', function(attrs) {
+  //      console.log(prefix + 'Attributes: %s', inspect(attrs, false, 8));
+      });
+      msg.once('end', function() {
+        console.log(prefix + 'Finished');
+      });
+    });
+    f.once('error', function(err) {
+      console.log('Fetch error: ' + err);
+    });
+    f.once('end', function() {
+      console.log('Done fetching all messages!');
+      imap.end();
+    });
+  });
+});
+
+imap.once('error', function(err) {
+  console.log(err);
+});
+
+imap.once('end', function() {
+  console.log('Connection ended');
+});
+
+imap.connect();
+
+
+*/
+
+
 
 //////////////////////////////////////////
 //              Routes                   //
