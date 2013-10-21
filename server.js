@@ -1,58 +1,57 @@
 //setup Dependencies
 var connect = require('connect')
-    , express = require('express')
-    , io = require('socket.io')
-    , port = (process.env.PORT || 8081), gpio = require('pi-gpio'), WebSocketServer = require('ws').Server, Imap = require('imap'), inspect = require('util').inspects
+	, express = require('express')
+	, io = require('socket.io')
+	, port = (process.env.PORT || 8081), gpio = require('pi-gpio'), WebSocketServer = require('ws').Server, Imap = require('imap'), inspect = require('util').inspects
 
 
 //Setup Express
 var server = express.createServer();
 server.configure(function(){
-    server.set('views', __dirname + '/views');
-    server.set('view options', { layout: false });
-    server.use(connect.bodyParser());
-    server.use(express.cookieParser());
-    server.use(express.session({ secret: "shhhhhhhhh!"}));
-    server.use(connect.static(__dirname + '/static'));
-    server.use(server.router);
+	server.set('views', __dirname + '/views');
+    	server.set('view options', { layout: false });
+    	server.use(connect.bodyParser());
+    	server.use(express.cookieParser());
+    	server.use(express.session({ secret: "shhhhhhhhh!"}));
+    	server.use(connect.static(__dirname + '/static'));
+    	server.use(server.router);
 });
 
 //setup the errors
 server.error(function(err, req, res, next){
-    if (err instanceof NotFound) {
-        res.render('404.jade', { locals: { 
-                  title : '404 - Not Found'
-                 ,description: ''
-                 ,author: ''
-                 ,analyticssiteid: 'XXXXXXX' 
-                },status: 404 });
-    } else {
-        res.render('500.jade', { locals: { 
-                  title : 'The Server Encountered an Error'
-                 ,description: ''
-                 ,author: ''
-                 ,analyticssiteid: 'XXXXXXX'
-                 ,error: err 
-                },status: 500 });
-    }
+    	if (err instanceof NotFound) {
+        	res.render('404.jade', { locals: { 
+                  	title : '404 - Not Found'
+                 	,description: ''
+                 	,author: ''
+                 	,analyticssiteid: 'XXXXXXX' 
+		},status: 404 });
+    	} else {
+        	res.render('500.jade', { locals: { 
+                  	title : 'The Server Encountered an Error'
+                 	,description: ''
+                 	,author: ''
+                 	,analyticssiteid: 'XXXXXXX'
+                 	,error: err 
+                	},status: 500 });
+    	}
 });
-server.listen( port);
+server.listen(port);
 
 //Setup Socket.IO
 var io = io.listen(server);
-io.sockets.on('connection', function(socket){
-  console.log('Client Connected');
-  socket.on('message', function(data){
-    socket.broadcast.emit('server_message',data);
-    socket.emit('server_message',data);
-  });
-
-  socket.on('setPseudo', function (data) {
-   socket.set('pseudo', data);
- });
-  socket.on('disconnect', function(){
-    console.log('Client Disconnected.');
-  });
+	io.sockets.on('connection', function(socket) {
+  		console.log('Client Connected');
+  		socket.on('message', function(data) {
+    		socket.broadcast.emit('server_message',data);
+    		socket.emit('server_message',data);
+	});
+	socket.on('setPseudo', function (data) {
+		socket.set('pseudo', data);
+	});
+	socket.on('disconnect', function() {
+    		console.log('Client Disconnected.');
+  	});
 });
 
 function Client(name) {
@@ -62,26 +61,38 @@ function Client(name) {
 function Light(pin) {
 	this.pin = pin
 	this.lit = false
-	this.enable = function() {
-		gpio.open(this.pin, 'output', function(err) { console.log('error opening pin') } )
+	this.openPin = function() {
+		gpio.open(this.pin, 'output')
 	}
-	this.disable = function() {
-		gpio.close(this.pin, function() { console.log('closing pin') })
+	this.closePin = function () {
+		gpio.close(this.pin)
 	}
 	this.toggle = function() {
 		if(this.lit){
 			gpio.write(this.pin, 0, function(){})
+		//	gpio.close(this.pin, function(){})
 			this.lit=false
 		}
 		else {
+		//	gpio.open(this.pin, 'output', function(){})
 			gpio.write(this.pin, function(){})
 			this.lit=true
 		}	
 	}
 }
-var green = new Light(16)
-var red = new Light(18)
-var numClients = 0
+
+function initLights() {
+	var green = new Light(16)
+	var red = new Light(18)
+	green.openPin()
+	red.openPin
+}
+function deinitLights() {
+	green.closePin()
+	red.closePin()
+}
+
+initLights()
 
 //set up ws
 wss = new WebSocketServer({port: 8765});
@@ -94,22 +105,18 @@ wss.on('connection', function(ws) {
 		if(message=='2') {
 			red.toggle()	
 		}
+		if(message=='3') {
+			console.log('lights de-initialized.  Server restart required')
+			deinitLights()
+		}
 	})
 	ws.on('close', function () {
-		console.log('client closed')
-		numClients-=1
-		green.disable()
-		red.disable()
+		//console.log('client closed')
 	})
 	ws.on('open',  function() {
-		console.log('new client')
+		//console.log('new client')
 		//clients[numClients] = new Client(Math.floor((Math.random()*100)+1))
 		//numClients+=1
-		if(numClients==0){
-			green.enable()
-			red.enable()
-		}
-		numClients+=1
 	})
 })
 /*
