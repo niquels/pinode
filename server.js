@@ -91,6 +91,7 @@ function deinitLights() {
 	green.closePin()
 	red.closePin()
 }
+
 initLights()
 
 //set up ws
