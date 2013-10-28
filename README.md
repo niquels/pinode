@@ -9,6 +9,11 @@ WebSockets that are received tell the Raspberry Pi are used to determine the act
 
 
 
+Ideas
+
+(http://www.robotshop.com/en/dagu-mini-pan-and-tilt-kit.html)[This may come in handy]
+
+
 Design
 
 Switch module
