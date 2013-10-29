@@ -62,37 +62,29 @@ function Light(pin) {
 	this.pin = pin
 	this.lit = false
 	this.openPin = function() {
-		gpio.open(this.pin, 'output')
+		gpio.open(this.pin, 'output', function(){gpio.close(this.pin)})
 	}
 	this.closePin = function () {
-		gpio.close(this.pin)
+//		gpio.close(this.pin)
 	}
 	this.toggle = function() {
 		if(this.lit){
-			gpio.write(this.pin, 0, function(){})
+//			gpio.write(this.pin, 0, function(){})
 		//	gpio.close(this.pin, function(){})
 			this.lit=false
 		}
 		else {
 		//	gpio.open(this.pin, 'output', function(){})
-			gpio.write(this.pin, function(){})
+//			gpio.write(this.pin, function(){})
 			this.lit=true
 		}	
 	}
 }
 
-function initLights() {
-	var green = new Light(16)
-	var red = new Light(18)
-	green.openPin()
-	red.openPin
-}
-function deinitLights() {
-	green.closePin()
-	red.closePin()
-}
-
-initLights()
+var green = new Light(16)
+green.openPin()
+var red = new Light(18)
+red.openPin()
 
 //set up ws
 wss = new WebSocketServer({port: 8765});
@@ -107,16 +99,14 @@ wss.on('connection', function(ws) {
 		}
 		if(message=='3') {
 			console.log('lights de-initialized.  Server restart required')
-			deinitLights()
+			deinitLights(green,red)
 		}
 	})
 	ws.on('close', function () {
 		//console.log('client closed')
 	})
 	ws.on('open',  function() {
-		//console.log('new client')
-		//clients[numClients] = new Client(Math.floor((Math.random()*100)+1))
-		//numClients+=1
+
 	})
 })
 /*
